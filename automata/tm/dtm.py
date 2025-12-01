@@ -247,3 +247,22 @@ class DTM(tm.TM):
         while not self._has_accepted(current_configuration):
             current_configuration = self._get_next_configuration(current_configuration)
             yield current_configuration
+
+
+    def iter_transitions(
+        self,
+    ) -> Generator[Tuple[DTMStateT, DTMStateT, str, str, ], None, None]:
+        """
+        Iterate over all transitions in the DFA. Each transition is a tuple
+        of the form (from_state, to_state, symbol).
+
+        Returns
+        ------
+        Generator[Tuple[DFAStateT, DFAStateT, str], None, None]
+            The desired generator over the DFA transitions.
+        """
+        return (
+            (from_, to_, symbol, write_symbol, move_direction)
+            for from_, lookup in self.transitions.items()
+            for symbol, (to_, write_symbol, move_direction) in lookup.items()
+        )
