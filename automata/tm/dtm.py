@@ -251,15 +251,15 @@ class DTM(tm.TM):
 
     def iter_transitions(
         self,
-    ) -> Generator[Tuple[DTMStateT, DTMStateT, str, str, ], None, None]:
+    ) -> Generator[Tuple[DTMStateT, DTMStateT, str, str, str], None, None]:
         """
-        Iterate over all transitions in the DFA. Each transition is a tuple
-        of the form (from_state, to_state, symbol).
+        Iterate over all transitions in the DTM. Each transition is a tuple
+        of the form (from_state, to_state, input_symbol, write_symbol, move_direction).
 
         Returns
         ------
-        Generator[Tuple[DFAStateT, DFAStateT, str], None, None]
-            The desired generator over the DFA transitions.
+        Generator[Tuple[DTMStateT, DTMStateT, str, str, str], None, None]
+            The desired generator over the DTM transitions.
         """
         return (
             (from_, to_, symbol, write_symbol, move_direction)

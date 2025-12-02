@@ -3,8 +3,7 @@
 import abc
 import os
 from collections import defaultdict
-from typing import AbstractSet, Literal, Optional, Tuple, Union
-
+from typing import AbstractSet, Literal, Tuple, Union
 
 import automata.base.exceptions as exceptions
 from automata.base.automaton import Automaton, AutomatonStateT
@@ -18,7 +17,6 @@ from automata.base.utils import (
 
 # Optional imports for use with visual functionality
 if not _missing_visual_imports:
-    import coloraide
     import pygraphviz as pgv
 
 TMStateT = AutomatonStateT
@@ -64,7 +62,6 @@ class TM(Automaton, metaclass=abc.ABCMeta):
 
     def show_diagram(
         self,
-        input_str: Optional[str] = None,
         path: Union[str, os.PathLike, None] = None,
         *,
         layout_method: LayoutMethod = "dot",
@@ -76,13 +73,10 @@ class TM(Automaton, metaclass=abc.ABCMeta):
         state_separation: float = 0.5,
     ) -> pgv.AGraph:
         """
-        Generates a diagram of the associated automaton.
+        Generates a diagram of the associated TM.
 
         Parameters
         ----------
-        input_str : Optional[str], default: None
-            String consisting of input symbols. If set, will add processing of
-            the input string to the diagram.
         path : Union[str, os.PathLike, None], default: None
             Path to output file. If None, the output will not be saved.
         horizontal : bool, default: True
@@ -140,8 +134,10 @@ class TM(Automaton, metaclass=abc.ABCMeta):
 
         is_edge_drawn = defaultdict(lambda: False)
         edge_labels = defaultdict(list)
-        for from_state, to_state, input_symbol, write_symbol, move_direction in self.iter_transitions():
-            if is_edge_drawn[from_state, to_state, input_symbol, write_symbol, move_direction]:
+        for (from_state, to_state, input_symbol,
+             write_symbol, move_direction) in self.iter_transitions():
+            if is_edge_drawn[from_state, to_state, input_symbol,
+                             write_symbol, move_direction]:
                 continue
 
             from_node = self._get_state_name(from_state)
