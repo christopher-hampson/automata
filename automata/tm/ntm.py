@@ -12,6 +12,7 @@ NTMStateT = tm.TMStateT
 NTMPathResultT = Tuple[NTMStateT, str, tm.TMDirectionT]
 NTMPathT = Mapping[str, AbstractSet[NTMPathResultT]]
 NTMTransitionsT = Mapping[NTMStateT, NTMPathT]
+TMDirectionT = tm.TMDirectionT
 
 
 class NTM(tm.TM):
@@ -269,14 +270,14 @@ class NTM(tm.TM):
 
     def iter_transitions(
         self,
-    ) -> Generator[Tuple[NTMStateT, NTMStateT, str, str, str], None, None]:
+    ) -> Generator[Tuple[NTMStateT, NTMStateT, str, str, TMDirectionT], None, None]:
         """
         Iterate over all transitions in the NTM. Each transition is a tuple
         of the form (from_state, to_state, input_symbol, write_symbol, move_direction).
 
         Returns
         ------
-        Generator[Tuple[NTMStateT, NTMStateT, str, str, str], None, None]
+        Generator[Tuple[NTMStateT, NTMStateT, str, str, TMDirectionT], None, None]
             The desired generator over the NTM transitions.
         """
         return (

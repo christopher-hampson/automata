@@ -12,7 +12,7 @@ DTMStateT = tm.TMStateT
 DTMPathResultT = Tuple[DTMStateT, str, tm.TMDirectionT]
 DTMPathT = Mapping[str, DTMPathResultT]
 DTMTransitionsT = Mapping[DTMStateT, DTMPathT]
-
+TMDirectionT = tm.TMDirectionT
 
 class DTM(tm.TM):
     """
@@ -251,14 +251,14 @@ class DTM(tm.TM):
 
     def iter_transitions(
         self,
-    ) -> Generator[Tuple[DTMStateT, DTMStateT, str, str, str], None, None]:
+    ) -> Generator[Tuple[DTMStateT, DTMStateT, str, str, TMDirectionT], None, None]:
         """
         Iterate over all transitions in the DTM. Each transition is a tuple
         of the form (from_state, to_state, input_symbol, write_symbol, move_direction).
 
         Returns
         ------
-        Generator[Tuple[DTMStateT, DTMStateT, str, str, str], None, None]
+        Generator[Tuple[DTMStateT, DTMStateT, str, str, TMDirectionT], None, None]
             The desired generator over the DTM transitions.
         """
         return (

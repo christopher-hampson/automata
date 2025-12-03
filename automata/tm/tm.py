@@ -3,7 +3,7 @@
 import abc
 import os
 from collections import defaultdict
-from typing import AbstractSet, Literal, Tuple, Union
+from typing import AbstractSet, Generator, Literal, Tuple, Union
 
 import automata.base.exceptions as exceptions
 from automata.base.automaton import Automaton, AutomatonStateT
@@ -59,6 +59,18 @@ class TM(Automaton, metaclass=abc.ABCMeta):
                 "initial state {} cannot be a final state".format(self.initial_state)
             )
 
+    @abc.abstractmethod
+    def iter_transitions(
+        self,
+    ) -> Generator[Tuple[TMStateT, TMStateT, str, str, TMDirectionT], None, None]:
+        """
+        Iterate over all transitions in the DTM. Each transition is a tuple
+        of the form (from_state, to_state, input_symbol, write_symbol, move_direction).
+        """
+
+        raise NotImplementedError(
+            f"iter_transitions is not implemented for {self.__class__}"
+        )
 
     def show_diagram(
         self,
@@ -132,13 +144,9 @@ class TM(Automaton, metaclass=abc.ABCMeta):
         graph.add_nodes_from(nonfinal_states, shape="circle", fontsize=font_size_str)
         graph.add_nodes_from(final_states, shape="doublecircle", fontsize=font_size_str)
 
-        is_edge_drawn = defaultdict(lambda: False)
         edge_labels = defaultdict(list)
         for (from_state, to_state, input_symbol,
              write_symbol, move_direction) in self.iter_transitions():
-            if is_edge_drawn[from_state, to_state, input_symbol,
-                             write_symbol, move_direction]:
-                continue
 
             from_node = self._get_state_name(from_state)
             to_node = self._get_state_name(to_state)
