@@ -3,7 +3,7 @@
 import abc
 import os
 from collections import defaultdict
-from typing import AbstractSet, Generator, Literal, Tuple, Union
+from typing import AbstractSet, Callable, Generator, Literal, Tuple, Union
 
 import automata.base.exceptions as exceptions
 from automata.base.automaton import Automaton, AutomatonStateT
@@ -35,7 +35,9 @@ class TM(Automaton, metaclass=abc.ABCMeta):
     def _get_edge_name(
         input_symbol: str = "", write_symbol: str = "", move_direction: str = ""
     ) -> str:
-        return f"{input_symbol}/{write_symbol}/{move_direction}"
+        
+        show_invisible = lambda s: "␣" if s.isspace() else str(s)
+        return f"{show_invisible(input_symbol)}→{show_invisible(write_symbol)},{move_direction}"
 
 
     def _read_input_symbol_subset(self) -> None:
@@ -83,6 +85,8 @@ class TM(Automaton, metaclass=abc.ABCMeta):
         font_size: float = 14.0,
         arrow_size: float = 0.85,
         state_separation: float = 0.5,
+        node_formatter: Union[Callable[[str],str], None] = None,
+        edge_formatter: Union[Callable[[str,str,TMDirectionT],str], None] = None,
     ) -> pgv.AGraph:
         """
         Generates a diagram of the associated TM.
@@ -103,6 +107,12 @@ class TM(Automaton, metaclass=abc.ABCMeta):
             Arrow size in the output graph.
         state_separation : float, default: 0.5
             Distance between nodes in the output graph.
+        node_formatter : Union[Callable[[str],str], None] , default: None
+            A function that takes a state as input and returns a string
+            representing the state in the diagram.
+        edge_formatter : Union[Callable[[str,str,TMDirectionT],str], None], default: None
+            A function that takes input_symbol, write_symbol, move_direction
+            as input and returns a string representing the edge in the diagram.
 
         Returns
         ------
@@ -112,6 +122,12 @@ class TM(Automaton, metaclass=abc.ABCMeta):
 
         if _missing_visual_imports:
             raise _missing_visual_imports
+        
+        if node_formatter is None:
+            node_formatter = self._get_state_name
+        
+        if edge_formatter is None:
+            edge_formatter = self._get_edge_name
 
         # Defining the graph.
         graph = create_graph(
@@ -131,7 +147,7 @@ class TM(Automaton, metaclass=abc.ABCMeta):
             shape="point",
             fontsize=font_size_str,
         )
-        initial_node = self._get_state_name(self.initial_state)
+        initial_node = node_formatter(self.initial_state)
         graph.add_edge(
             null_node,
             initial_node,
@@ -139,8 +155,8 @@ class TM(Automaton, metaclass=abc.ABCMeta):
             arrowsize=arrow_size_str,
         )
 
-        nonfinal_states = map(self._get_state_name, self.states - self.final_states)
-        final_states = map(self._get_state_name, self.final_states)
+        nonfinal_states = map(node_formatter, self.states - self.final_states)
+        final_states = map(node_formatter, self.final_states)
         graph.add_nodes_from(nonfinal_states, shape="circle", fontsize=font_size_str)
         graph.add_nodes_from(final_states, shape="doublecircle", fontsize=font_size_str)
 
@@ -150,7 +166,12 @@ class TM(Automaton, metaclass=abc.ABCMeta):
 
             from_node = self._get_state_name(from_state)
             to_node = self._get_state_name(to_state)
-            label = self._get_edge_name(input_symbol, write_symbol, move_direction)
+            label = edge_formatter(
+                input_symbol,
+                write_symbol,
+                move_direction,
+            )
+            # label = self._get_edge_name(input_symbol, write_symbol, move_direction)
             edge_labels[from_node, to_node].append(label)
 
         for (from_node, to_node), labels in edge_labels.items():
